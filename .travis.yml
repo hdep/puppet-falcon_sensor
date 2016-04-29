@@ -9,7 +9,8 @@ before_install: rm .gemfiles/Gemfile.rspec.lock || true
 gemfile: .gemfiles/Gemfile.rspec
 
 script:
- - "bundle exec rake SPEC_OPTS='--format documentation'"
+ - "bundle install"
+ - "bundle exec rake"
 
 env:
   - PUPPET_VERSION="~> 2.7.0"
