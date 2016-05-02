@@ -1,7 +1,6 @@
+sudo: false
 language: ruby
 rvm:
-  - 1.8.7
-  - 1.9.3
   - 2.0.0
   - 2.1.1
 
@@ -9,19 +8,10 @@ before_install: rm .gemfiles/Gemfile.rspec.lock || true
 gemfile: .gemfiles/Gemfile.rspec
 
 script:
- - "bundle exec rake SPEC_OPTS='--format documentation'"
+ - "bundle install"
+ - "bundle exec rake"
 
 env:
-  - PUPPET_VERSION="~> 2.7.0"
   - PUPPET_VERSION="~> 3.8.0"
   - PUPPET_VERSION="~> 4.4.0"
-
-matrix:
-  exclude:
-    - rvm: 1.9.3
-      env: PUPPET_VERSION="~> 2.7.0"
-    - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 2.7.0"
-    - rvm: 2.1.1
-      env: PUPPET_VERSION="~> 2.7.0"
 
