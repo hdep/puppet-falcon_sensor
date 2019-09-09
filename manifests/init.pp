@@ -56,7 +56,7 @@ class falcon_sensor (
     $package_ensure = $ensure
   }
 
-  package { "${package_name}":
+  package { $package_name:
     ensure => $package_ensure,
   }
 
