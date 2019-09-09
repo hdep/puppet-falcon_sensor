@@ -12,8 +12,8 @@ except subprocess.CalledProcessError as err:
           err.output), file=sys.stderr)
     sys.exit(err.returncode)
 
-facts = {x.split('=')[0].strip('" '): x.split('=')[1].strip('" ')
-         for x in output.decode('ascii')[:-1].split(', ')}
+facts = {'falcon_sensor': {x.split('=')[0].strip('" '): x.split('=')[1].strip('" ')
+    for x in output.decode('ascii')[:-1].split(', ')}}
 
 
 print(json.dumps(facts, indent=2))
