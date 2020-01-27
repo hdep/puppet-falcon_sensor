@@ -7,7 +7,7 @@
 # This module does not:
 #   * Ensure audit is enabled in your kernel
 #   * Configure your local firewall's egress rules to access the SaaS
-#   
+#
 #
 # Parameters
 # ----------
@@ -46,6 +46,7 @@ class falcon_sensor (
   $ensure       = 'present',
   $package_name = 'falcon-sensor',
   $autoupgrade  = false,
+  $cid          = Undef
 ) {
 
   validate_re($ensure, ['^present|absent',])
@@ -58,6 +59,12 @@ class falcon_sensor (
 
   package { $package_name:
     ensure => $package_ensure,
+  }
+
+  if $cid and $facts['falcon_sensor']['cid'] != $cid {
+    exec { 'configure_falcon_sensor':
+      command => "falconctl -s --cid ${cid}"
+    }
   }
 
 }
