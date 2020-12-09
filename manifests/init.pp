@@ -46,19 +46,38 @@ class falcon_sensor (
   $ensure       = 'present',
   $package_name = 'falcon-sensor',
   $autoupgrade  = false,
-  $cid          = Undef
+  $cid          = Undef,
+  Boolean $download_package,
+  String $package_url,
+  String $package_filename,
 ) {
 
   validate_re($ensure, ['^present|absent',])
 
-  if $ensure == 'present' and $autoupgrade {
-    $package_ensure = 'latest'
-  } else {
-    $package_ensure = $ensure
-  }
+  if $falcon_sensor::download_package {
+    archive { "/tmp/$falcon_sensor::package_filename":
+      ensure       => present,
+      source       => $falcon_sensor::package_url,
+      proxy_server => $falcon_sensor::proxy,
+    }
 
-  package { $package_name:
-    ensure => $package_ensure,
+    package { $package_name:
+      ensure   => $ensure,
+      source   => "/tmp/$qualys_agent::package_filename",
+      name     => $falcon_sensor::package_name,
+      provider => $provider,
+    }
+  } 
+  else {
+      if $ensure == 'present' and $autoupgrade {
+        $package_ensure = 'latest'
+      } else {
+        $package_ensure = $ensure
+      }
+
+      package { $package_name:
+        ensure => $package_ensure,
+      }
   }
 
   if $cid and $facts['falcon_sensor']['cid'] != $cid {
