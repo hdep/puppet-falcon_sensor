@@ -47,27 +47,48 @@ class falcon_sensor (
   $package_name = 'falcon-sensor',
   $autoupgrade  = false,
   $cid          = Undef,
-  Boolean $download_package,
-  String $package_url,
-  String $package_filename,
+  Boolean $download_package          = false,
+  String $download_dir               = '/usr/local/src',
+  Optional[String] $package_url      = undef,
+  Optional[String] $package_filename = 'falcon-sensor',
+  Optional[String] $proxy_url        = undef,
+  Integer $proxy_port                = 3128,
+  String $proxy_type                 = 'http',
 ) {
 
   validate_re($ensure, ['^present|absent',])
 
   if $falcon_sensor::download_package {
-    archive { "/tmp/$falcon_sensor::package_filename":
+    archive { "${falcon_sensor::download_dir}/${falcon_sensor::package_filename}":
       ensure       => present,
       source       => $falcon_sensor::package_url,
-      proxy_server => $falcon_sensor::proxy,
+      proxy_server => "${falcon_sensor::proxy_type}${falcon_sensor::proxy_url}:${falcon_sensor::proxy_port}",
+    }
+
+    $provider = $facts['os']['name'] ? {
+      'RedHat' => rpm,
+      'CentOS' => rpm,
+      'Debian' => dpkg
+    }
+
+    $dependency = $::operatingsystem ? {
+      Debian => 'libnl-genl-3-200',
+      default => 'libnl'
+    }
+
+    package { 'libnl':
+      ensure => $ensure,
+      name   => $dependency,
     }
 
     package { $package_name:
       ensure   => $ensure,
-      source   => "/tmp/$qualys_agent::package_filename",
+      source   => "/tmp/${qualys_agent::package_filename}",
       name     => $falcon_sensor::package_name,
       provider => $provider,
+      require  => Archive["${falcon_sensor::download_dir}/${falcon_sensor::package_name}"],
     }
-  } 
+  }
   else {
       if $ensure == 'present' and $autoupgrade {
         $package_ensure = 'latest'
@@ -80,10 +101,14 @@ class falcon_sensor (
       }
   }
 
+  service { 'falcon-sensor':
+    ensure  => true,
+    require => Package[$package_name],
+  }
+
   if $cid and $facts['falcon_sensor']['cid'] != $cid {
     exec { 'configure_falcon_sensor':
       command => "falconctl -s --cid ${cid}"
     }
   }
-
 }
