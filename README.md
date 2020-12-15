@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/hdep/puppet-falcon_sensor.svg?branch=master)](https://travis-ci.org/hdep/puppet-falcon_sensor)
 # falcon_sensor
 
 #### Table of Contents

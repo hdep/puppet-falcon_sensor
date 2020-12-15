@@ -9,7 +9,7 @@ describe 'falcon_sensor' do
   end
 
   context 'with ensure absent' do
-    let :params {{
+    let(:params) {{
       :ensure => 'absent'
     }}
     end
@@ -20,7 +20,7 @@ describe 'falcon_sensor' do
   end
 
   context 'with autoupgrade enabled' do
-    let :params {{
+    let(:params) {{
       :autoupgrade => true
     }}
     end
