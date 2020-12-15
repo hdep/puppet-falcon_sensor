@@ -26,6 +26,28 @@
 #   is provider dependent.
 #   Default: false
 #
+# [*cid*]
+#  String, Customer Identification Code provided from crowdstrike.
+#  Default : undef
+#
+# [*download_package*]
+# Boolean. If set to true this will download the deb package from provided URL in $package_url
+# usefull when you don't have a deb repository
+# Default : false
+#
+# [*download_dir*]
+# String. Directory where to put the download deb file.
+#
+# [*package_url*]
+# Optional http url where to download the .deb file.
+# 
+# [*package_filename*]
+# Package name on the system.
+#
+# [*proxy_url*]
+# proxy DNS name only. Like proxy.domain.fr
+# If set it is used for downloading the archive and reaching Crowdstrike servers.
+#
 # Examples
 # --------
 #
