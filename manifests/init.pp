@@ -76,6 +76,7 @@ class falcon_sensor (
   Optional[String] $proxy_url        = undef,
   Integer $proxy_port                = 3128,
   String $proxy_type                 = 'http',
+  Optional[String] $tag              = undef,
 ) {
 
   validate_re($ensure, ['^present|absent',])
@@ -128,9 +129,46 @@ class falcon_sensor (
     require => Package[$package_name],
   }
 
-  if $cid and $facts['falcon_sensor']['cid'] != $cid {
-    exec { 'configure_falcon_sensor':
-      command => "falconctl -s --cid ${cid}"
+  if $falcon_sensor::proxyname {
+    if $falcon_sensor::tags {
+      exec { 'configure_falcon_sensor_with_proxy_and_tag':
+        command => "/opt/CrowdStrike/falconctl -s -f --cid=${falcon_sensor::cid} --tags=${falcon_sensor::tag} \
+         --aph=${falcon_sensor::proxy_url} --app=${falcon_sensor::proxy_port}",
+        onlyif  => [
+          '/opt/CrowdStrike/falconctl -g --cid ; if [ $? -eq 0 ]; then exit 1 ; else exit 0 ; fi'
+        ],
+        require => Package[$package_name],
+      }
+    }
+    else {
+      exec { 'configure_falcon_sensor_with_proxy_without_tag':
+        command => "/opt/CrowdStrike/falconctl -s -f --cid=${falcon_sensor::cid} --aph=${falcon_sensor::proxy_url} \
+        --app=${falcon_sensor::proxy_port}",
+        onlyif  => [
+          '/opt/CrowdStrike/falconctl -g --cid ; if [ $? -eq 0 ]; then exit 1 ; else exit 0 ; fi'
+        ],
+        require => Package[$package_name],
+      }
+    }
+  }
+  else {
+    if $tag {
+      exec { 'configure_falcon_sensor_without_proxy':
+        command => "/opt/CrowdStrike/falconctl -s -f --cid=${falcon_sensor::cid} --tags=${falcon_sensor::tag}",
+        onlyif  => [
+          '/opt/CrowdStrike/falconctl -g --cid ; if [ $? -eq 0 ]; then exit 1 ; else exit 0 ; fi'
+        ],
+        require => Package[$package_name],
+      }
+    }
+    else {
+      exec { 'configure_falcon_sensor_without_proxy_tag':
+        command => "/opt/CrowdStrike/falconctl -s -f --cid=${falcon_sensor::cid}",
+        onlyif  => [
+          '/opt/CrowdStrike/falconctl -g --cid ; if [ $? -eq 0 ]; then exit 1 ; else exit 0 ; fi'
+        ],
+        require => Package[$package_name],
+      }
     }
   }
 }
